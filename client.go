@@ -1,7 +1,10 @@
 package godhan
 
+import "sync"
+
 // Client is the primary interface for communicating with DhanHQ REST API
 type Client struct {
+	mu          sync.RWMutex
 	clientID    string
 	accessToken string
 	baseURI     string
@@ -59,13 +62,31 @@ func NewClient(clientID, accessToken string, opts ...Option) *Client {
 	return c
 }
 
-// ClientID returns the configured Dhan Client ID
+// SetClientID updates the configured Dhan Client ID thread-safely
+func (c *Client) SetClientID(clientID string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.clientID = clientID
+}
+
+// ClientID returns the configured Dhan Client ID thread-safely
 func (c *Client) ClientID() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	return c.clientID
 }
 
-// AccessToken returns the configured Access Token
+// SetAccessToken updates the configured access token thread-safely
+func (c *Client) SetAccessToken(token string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.accessToken = token
+}
+
+// AccessToken returns the configured Access Token thread-safely
 func (c *Client) AccessToken() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	return c.accessToken
 }
 
@@ -83,8 +104,9 @@ func New(opts ...Option) *Client {
 
 // GetLoginURL generates the DhanHQ consent login URL for partner authentication
 func (c *Client) GetLoginURL(partnerID string) string {
+	clientID := c.ClientID()
 	if partnerID != "" {
-		return "https://auth.dhan.co/login/consent?partner_id=" + partnerID + "&client_id=" + c.clientID
+		return "https://auth.dhan.co/login/consent?partner_id=" + partnerID + "&client_id=" + clientID
 	}
-	return "https://auth.dhan.co/login/consent?client_id=" + c.clientID
+	return "https://auth.dhan.co/login/consent?client_id=" + clientID
 }

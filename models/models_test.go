@@ -127,3 +127,53 @@ func TestDhanPostbackPayload_Serialization(t *testing.T) {
 		t.Errorf("Unexpected postback payload: %+v", pb)
 	}
 }
+
+func TestRenewTokenResponse_Serialization(t *testing.T) {
+	rawJSON := `{
+		"dhanClientId": "1000000001",
+		"dhanClientName": "Jane Doe",
+		"dhanClientUcc": "UCC999",
+		"givenPowerOfAttorney": true,
+		"accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test",
+		"expiryTime": "2026-10-27 15:30:00"
+	}`
+
+	var resp models.RenewTokenResponse
+	if err := json.Unmarshal([]byte(rawJSON), &resp); err != nil {
+		t.Fatalf("Unmarshal RenewTokenResponse failed: %v", err)
+	}
+
+	if resp.DhanClientID != "1000000001" {
+		t.Errorf("DhanClientID = %q, want '1000000001'", resp.DhanClientID)
+	}
+	if resp.DhanClientName != "Jane Doe" {
+		t.Errorf("DhanClientName = %q, want 'Jane Doe'", resp.DhanClientName)
+	}
+	if resp.DhanClientUCC != "UCC999" {
+		t.Errorf("DhanClientUCC = %q, want 'UCC999'", resp.DhanClientUCC)
+	}
+	if !resp.GivenPowerOfAttorney {
+		t.Errorf("GivenPowerOfAttorney = false, want true")
+	}
+	if resp.AccessToken != "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test" {
+		t.Errorf("AccessToken = %q, want expected JWT", resp.AccessToken)
+	}
+	if resp.ExpiryTime.Time.Year() != 2026 {
+		t.Errorf("ExpiryTime year = %d, want 2026", resp.ExpiryTime.Time.Year())
+	}
+
+	marshaled, err := json.Marshal(resp)
+	if err != nil {
+		t.Fatalf("Marshal RenewTokenResponse failed: %v", err)
+	}
+
+	var roundTrip models.RenewTokenResponse
+	if err := json.Unmarshal(marshaled, &roundTrip); err != nil {
+		t.Fatalf("Round-trip Unmarshal failed: %v", err)
+	}
+
+	if roundTrip.AccessToken != resp.AccessToken {
+		t.Errorf("roundTrip.AccessToken = %q, want %q", roundTrip.AccessToken, resp.AccessToken)
+	}
+}
+

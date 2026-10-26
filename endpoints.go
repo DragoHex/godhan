@@ -8,6 +8,9 @@ const (
 
 // API Endpoint Paths
 const (
+	// Authentication
+	URIRenewToken = "/RenewToken"
+
 	// IP Whitelisting
 	URIGetIP    = "/ip/getIP"
 	URISetIP    = "/ip/setIP"

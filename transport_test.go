@@ -45,6 +45,9 @@ func TestTransport_HeaderInjection(t *testing.T) {
 	if capturedHeader.Get("client-id") != "mock-client-id" {
 		t.Errorf("expected client-id header 'mock-client-id', got '%s'", capturedHeader.Get("client-id"))
 	}
+	if capturedHeader.Get("dhanClientId") != "mock-client-id" {
+		t.Errorf("expected dhanClientId header 'mock-client-id', got '%s'", capturedHeader.Get("dhanClientId"))
+	}
 	if capturedHeader.Get("access-token") != "mock-access-token" {
 		t.Errorf("expected access-token header 'mock-access-token', got '%s'", capturedHeader.Get("access-token"))
 	}

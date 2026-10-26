@@ -58,9 +58,13 @@ func (c *Client) doRequest(ctx context.Context, method, endpoint string, query u
 		return fmt.Errorf("%w: failed to create request: %v", ErrInvalidInput, err)
 	}
 
+	clientID := c.ClientID()
+	accessToken := c.AccessToken()
+
 	// Inject mandatory Dhan headers
-	req.Header.Set("client-id", c.clientID)
-	req.Header.Set("access-token", c.accessToken)
+	req.Header.Set("client-id", clientID)
+	req.Header.Set("dhanClientId", clientID)
+	req.Header.Set("access-token", accessToken)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
