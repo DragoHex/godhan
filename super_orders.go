@@ -21,7 +21,7 @@ func (c *Client) PlaceSuperOrder(ctx context.Context, req models.SuperOrderReque
 		return nil, fmt.Errorf("%w: quantity must be greater than zero", ErrInvalidInput)
 	}
 	if req.DhanClientID == "" {
-		req.DhanClientID = c.clientID
+		req.DhanClientID = c.ClientID()
 	}
 	var resp models.OrderStatusResponse
 	if err := c.doRequest(ctx, http.MethodPost, URISuperOrders, nil, req, &resp); err != nil {
@@ -37,7 +37,7 @@ func (c *Client) ModifySuperOrder(ctx context.Context, orderID string, req model
 		return nil, fmt.Errorf("%w: orderId cannot be empty", ErrInvalidInput)
 	}
 	if req.DhanClientID == "" {
-		req.DhanClientID = c.clientID
+		req.DhanClientID = c.ClientID()
 	}
 	req.OrderID = cleanID
 

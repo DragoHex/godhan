@@ -23,7 +23,7 @@ func (c *Client) PlaceOrder(ctx context.Context, req models.OrderRequest) (*mode
 		return nil, fmt.Errorf("%w: quantity must be greater than zero", ErrInvalidInput)
 	}
 	if req.DhanClientID == "" {
-		req.DhanClientID = c.clientID
+		req.DhanClientID = c.ClientID()
 	}
 	var resp models.OrderStatusResponse
 	if err := c.doRequest(ctx, http.MethodPost, URIOrders, nil, req, &resp); err != nil {
@@ -39,7 +39,7 @@ func (c *Client) ModifyOrder(ctx context.Context, orderID string, req models.Ord
 		return nil, fmt.Errorf("%w: orderId cannot be empty", ErrInvalidInput)
 	}
 	if req.DhanClientID == "" {
-		req.DhanClientID = c.clientID
+		req.DhanClientID = c.ClientID()
 	}
 	req.OrderID = cleanID
 
@@ -108,7 +108,7 @@ func (c *Client) SliceOrder(ctx context.Context, req models.OrderRequest) ([]mod
 		return nil, fmt.Errorf("%w: quantity must be greater than zero", ErrInvalidInput)
 	}
 	if req.DhanClientID == "" {
-		req.DhanClientID = c.clientID
+		req.DhanClientID = c.ClientID()
 	}
 	var resp []models.OrderStatusResponse
 	if err := c.doRequest(ctx, http.MethodPost, URIOrdersSlicing, nil, req, &resp); err != nil {

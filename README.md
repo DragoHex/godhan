@@ -15,6 +15,8 @@ High-performance, production-grade Go SDK for the **DhanHQ API v2** trading infr
 ```
 godhan/
 ├── client.go              # Root Client & functional configuration options
+├── auth.go                # Token renewal & 24h validity extension
+├── proxy.go               # Static forward proxy support (WithProxy / ProxyConfig)
 ├── transport.go           # HTTPClient seam, connection pooling & header injection
 ├── endpoints.go           # DhanHQ API v2 REST URI constants
 ├── errors.go              # Structured APIError and domain sentinels
@@ -218,6 +220,34 @@ func main() {
 
 	_ = tk.ServeWithContext(ctx)
 }
+```
+
+---
+
+### 4. Static IP & Forward Proxy (Algo IP Whitelisting)
+
+Dhan enforces static IP whitelisting for order execution and trader control APIs. Configure dedicated forward proxies (such as `algoip.in`, `staticip.in`, or private forward proxies) with a single option:
+
+```go
+// Option A: Structured ProxyConfig
+client := godhan.NewClient("1000000001", "your-access-token",
+	godhan.WithProxy(godhan.ProxyConfig{
+		Host:         "dc46-mum-01.algoip.in",
+		Port:         443,
+		ClientID:     "your_proxy_username",
+		ClientSecret: "your_proxy_password",
+	}),
+)
+
+// Option B: Proxy URL string
+client := godhan.NewClient("1000000001", "your-access-token",
+	godhan.WithProxyURL("https://user:pass@dc46-mum-01.algoip.in:443"),
+)
+
+// WebSocket Ticker through proxy
+tk := ticker.NewTicker("1000000001", "your-access-token",
+	ticker.WithTickerProxyURL("https://user:pass@dc46-mum-01.algoip.in:443"),
+)
 ```
 
 ---

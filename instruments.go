@@ -95,6 +95,10 @@ func ParseInstruments(r io.Reader) ([]models.Instrument, error) {
 
 // GetInstruments streams and parses the official DhanHQ daily security master CSV
 func (c *Client) GetInstruments(ctx context.Context) ([]models.Instrument, error) {
+	if c.configErr != nil {
+		return nil, c.configErr
+	}
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, DefaultScripMasterURL, nil)
 	if err != nil {
 		return nil, err

@@ -39,7 +39,7 @@ func (c *Client) SetIP(ctx context.Context, req models.UserIPRequest) (*models.U
 		return nil, fmt.Errorf("%w: IP cannot be empty", ErrInvalidInput)
 	}
 	if req.DhanClientID == "" {
-		req.DhanClientID = c.clientID
+		req.DhanClientID = c.ClientID()
 	}
 	var resp models.UserIPResponse
 	if err := c.doRequest(ctx, http.MethodPost, URISetIP, nil, req, &resp); err != nil {
@@ -54,7 +54,7 @@ func (c *Client) ModifyIP(ctx context.Context, req models.UserIPRequest) (*model
 		return nil, fmt.Errorf("%w: IP cannot be empty", ErrInvalidInput)
 	}
 	if req.DhanClientID == "" {
-		req.DhanClientID = c.clientID
+		req.DhanClientID = c.ClientID()
 	}
 	var resp models.UserIPResponse
 	if err := c.doRequest(ctx, http.MethodPut, URIModifyIP, nil, req, &resp); err != nil {
@@ -101,7 +101,7 @@ func (c *Client) GetPnLExit(ctx context.Context) (*models.ExitPnlResponse, error
 // SetPnLExit configures automated P&L thresholds to exit open positions
 func (c *Client) SetPnLExit(ctx context.Context, req models.PnlBasedExitRequest) (*models.PnlExitResponse, error) {
 	if req.DhanClientID == "" {
-		req.DhanClientID = c.clientID
+		req.DhanClientID = c.ClientID()
 	}
 	var resp models.PnlExitResponse
 	if err := c.doRequest(ctx, http.MethodPost, URIPnLExit, nil, req, &resp); err != nil {

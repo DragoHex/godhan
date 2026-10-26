@@ -29,7 +29,7 @@ func (c *Client) GetFundLimits(ctx context.Context) (*models.FundLimitResponse, 
 // CalculateMargin computes pre-trade margin requirement for a single order
 func (c *Client) CalculateMargin(ctx context.Context, req models.KnowYourMarginReq) (*models.KnowYourMarginResponse, error) {
 	if req.DhanClientID == "" {
-		req.DhanClientID = c.clientID
+		req.DhanClientID = c.ClientID()
 	}
 	var resp models.KnowYourMarginResponse
 	if err := c.doRequest(ctx, http.MethodPost, URIMarginCalculator, nil, req, &resp); err != nil {
@@ -41,7 +41,7 @@ func (c *Client) CalculateMargin(ctx context.Context, req models.KnowYourMarginR
 // CalculateMultiMargin computes basket margin and hedging benefits across multiple legs
 func (c *Client) CalculateMultiMargin(ctx context.Context, req models.MultiScripMarginCalcRequest) (*models.MultiScripMarginCalcResponse, error) {
 	if req.DhanClientID == "" {
-		req.DhanClientID = c.clientID
+		req.DhanClientID = c.ClientID()
 	}
 	var resp models.MultiScripMarginCalcResponse
 	if err := c.doRequest(ctx, http.MethodPost, URIMarginCalculatorMulti, nil, req, &resp); err != nil {

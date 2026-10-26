@@ -103,3 +103,35 @@ func TestTicker_LifecycleAndStreaming(t *testing.T) {
 		t.Fatal("expected ticker.IsConnected() == false after Close")
 	}
 }
+
+func TestTicker_WithTickerProxyURL(t *testing.T) {
+	// 1. Option setting verification
+	ticker := NewTicker("test-client", "test-token",
+		WithTickerProxyURL("http://proxy.local:8080"),
+	)
+	if ticker.proxyURL == nil || ticker.proxyURL.String() != "http://proxy.local:8080" {
+		t.Fatalf("expected proxyURL http://proxy.local:8080, got %v", ticker.proxyURL)
+	}
+
+	// 2. Whitespace / empty proxy URL handling (should not set nil proxyURL)
+	tickerEmpty := NewTicker("test-client", "test-token",
+		WithTickerProxyURL("   "),
+	)
+	if tickerEmpty.proxyURL != nil {
+		t.Errorf("expected nil proxyURL for empty string, got %v", tickerEmpty.proxyURL)
+	}
+
+	// 3. Connect through unreachable proxy fails with ErrBrokerUnavailable
+	unreachableTicker := NewTicker("test-client", "test-token",
+		WithTickerURI("ws://127.0.0.1:59999/feed"),
+		WithTickerProxyURL("http://127.0.0.1:59998"),
+		WithAutoReconnect(false),
+	)
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+
+	err := unreachableTicker.Connect(ctx)
+	if err == nil {
+		t.Fatal("expected connection error through unreachable proxy, got nil")
+	}
+}

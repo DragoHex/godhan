@@ -38,7 +38,7 @@ func (c *Client) ConvertPosition(ctx context.Context, req models.PositionConvers
 		return fmt.Errorf("%w: convertQty must be greater than zero", ErrInvalidInput)
 	}
 	if req.DhanClientID == "" {
-		req.DhanClientID = c.clientID
+		req.DhanClientID = c.ClientID()
 	}
 	return c.doRequest(ctx, http.MethodPost, URIPositionsConvert, nil, req, nil)
 }

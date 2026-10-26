@@ -34,7 +34,7 @@ import (
 // PlaceForeverOrder creates a GTT (Good-Til-Triggered) conditional order
 func (c *Client) PlaceForeverOrder(ctx context.Context, req models.GTTOrderModel) (*models.GttOrderStatusResponse, error) {
 	if req.DhanClientID == "" {
-		req.DhanClientID = c.clientID
+		req.DhanClientID = c.ClientID()
 	}
 	var resp models.GttOrderStatusResponse
 	if err := c.doRequest(ctx, http.MethodPost, URIForeverOrders, nil, req, &resp); err != nil {
@@ -50,7 +50,7 @@ func (c *Client) ModifyForeverOrder(ctx context.Context, orderID string, req mod
 		return nil, fmt.Errorf("%w: orderId cannot be empty", ErrInvalidInput)
 	}
 	if req.DhanClientID == "" {
-		req.DhanClientID = c.clientID
+		req.DhanClientID = c.ClientID()
 	}
 	req.OrderID = cleanID
 
@@ -88,7 +88,7 @@ func (c *Client) GetForeverOrders(ctx context.Context) ([]models.ForeverOrderRes
 // PlaceAlertOrder creates conditional trigger alert
 func (c *Client) PlaceAlertOrder(ctx context.Context, req models.AlertOrderRequest) (*models.AlertOrderResponse, error) {
 	if req.DhanClientID == "" {
-		req.DhanClientID = c.clientID
+		req.DhanClientID = c.ClientID()
 	}
 	var resp models.AlertOrderResponse
 	if err := c.doRequest(ctx, http.MethodPost, URIAlertOrders, nil, req, &resp); err != nil {
@@ -151,7 +151,7 @@ func (c *Client) CancelAlertOrder(ctx context.Context, alertID string) (*models.
 // PlaceMultiOrder dispatches a batch of orders simultaneously
 func (c *Client) PlaceMultiOrder(ctx context.Context, req models.MultiOrderRequest) (*models.MultiOrderResponse, error) {
 	if req.DhanClientID == "" {
-		req.DhanClientID = c.clientID
+		req.DhanClientID = c.ClientID()
 	}
 	var resp models.MultiOrderResponse
 	if err := c.doRequest(ctx, http.MethodPost, URIMultiAlertOrders, nil, req, &resp); err != nil {

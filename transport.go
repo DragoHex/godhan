@@ -39,6 +39,10 @@ type genericEnvelope struct {
 
 // doRequest performs an HTTP request, injects required Dhan headers, and parses the response
 func (c *Client) doRequest(ctx context.Context, method, endpoint string, query url.Values, body interface{}, target interface{}) error {
+	if c.configErr != nil {
+		return c.configErr
+	}
+
 	fullURL := strings.TrimRight(c.baseURI, "/") + "/" + strings.TrimLeft(endpoint, "/")
 	if len(query) > 0 {
 		fullURL += "?" + query.Encode()

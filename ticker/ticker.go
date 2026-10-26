@@ -1,13 +1,14 @@
 package ticker
 
-
 import (
 	"context"
-	"errors"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
+	"net/url"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -22,7 +23,7 @@ const DefaultFeedURI = "wss://feed.dhan.co"
 
 var (
 	ErrBrokerUnavailable = errors.New("broker streaming gateway unreachable")
-	ErrInvalidInput       = errors.New("invalid input or packet")
+	ErrInvalidInput      = errors.New("invalid input or packet")
 )
 
 type OrderUpdate struct {
@@ -83,12 +84,25 @@ func WithAutoReconnect(enabled bool) TickerOption {
 	}
 }
 
+// WithTickerProxyURL configures a forward proxy for WebSocket dialer.
+func WithTickerProxyURL(rawURL string) TickerOption {
+	return func(t *Ticker) {
+		trimmed := strings.TrimSpace(rawURL)
+		if trimmed != "" {
+			if u, err := url.Parse(trimmed); err == nil && u.Host != "" {
+				t.proxyURL = u
+			}
+		}
+	}
+}
+
 // Ticker represents persistent WebSocket streaming client for live market quotes
 type Ticker struct {
 	clientID      string
 	accessToken   string
 	uri           string
 	autoReconnect bool
+	proxyURL      *url.URL
 
 	conn        *websocket.Conn
 	connMu      sync.Mutex
@@ -169,6 +183,12 @@ func (t *Ticker) Connect(ctx context.Context) error {
 	headers.Set("access-token", t.accessToken)
 
 	dialer := websocket.DefaultDialer
+	if t.proxyURL != nil {
+		dialer = &websocket.Dialer{
+			Proxy:            http.ProxyURL(t.proxyURL),
+			HandshakeTimeout: 10 * time.Second,
+		}
+	}
 	conn, _, err := dialer.DialContext(ctx, t.uri, headers)
 	if err != nil {
 		return fmt.Errorf("%w: failed to dial websocket: %v", ErrBrokerUnavailable, err)
@@ -250,7 +270,7 @@ func (t *Ticker) sendSubscriptionPayload(requestCode int, subs []TickerSubscript
 	}
 
 	reqData := map[string]interface{}{
-		"RequestCode": requestCode,
+		"RequestCode":    requestCode,
 		"InstrumentList": subs,
 	}
 

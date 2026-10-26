@@ -9,6 +9,7 @@ type Client struct {
 	accessToken string
 	baseURI     string
 	httpClient  HTTPClient
+	configErr   error
 }
 
 // Option represents a functional configuration option for Client
