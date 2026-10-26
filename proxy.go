@@ -147,3 +147,25 @@ func applyProxyURL(c *Client, proxyURL *url.URL) {
 		Timeout:   timeout,
 	}
 }
+
+// RESTClientFor builds an *http.Client configured with dedicated proxy settings and connection pooling.
+func RESTClientFor(cfg ProxyConfig) (*http.Client, error) {
+	u, err := cfg.URL()
+	if err != nil {
+		return nil, err
+	}
+	tr := &http.Transport{
+		Proxy:                 http.ProxyURL(u),
+		MaxIdleConns:          100,
+		MaxIdleConnsPerHost:   50,
+		IdleConnTimeout:       90 * time.Second,
+		ResponseHeaderTimeout: 5 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	}
+	return &http.Client{
+		Transport: tr,
+		Timeout:   15 * time.Second,
+	}, nil
+}
+

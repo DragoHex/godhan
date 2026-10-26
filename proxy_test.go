@@ -519,3 +519,35 @@ func TestClient_WithProxy_TransportPreservation(t *testing.T) {
 		t.Fatal("expected *http.Transport with non-nil Proxy")
 	}
 }
+
+func TestRESTClientFor(t *testing.T) {
+	// 1. Valid config
+	cfg := ProxyConfig{
+		Host:         "dc46-mum-01.algoip.in",
+		Port:         443,
+		ClientID:     "u1",
+		ClientSecret: "p1",
+	}
+	client, err := RESTClientFor(cfg)
+	if err != nil {
+		t.Fatalf("unexpected error from RESTClientFor: %v", err)
+	}
+	if client == nil || client.Transport == nil {
+		t.Fatal("expected non-nil *http.Client with non-nil Transport")
+	}
+	tr, ok := client.Transport.(*http.Transport)
+	if !ok || tr.Proxy == nil {
+		t.Fatal("expected *http.Transport with non-nil Proxy")
+	}
+
+	// 2. Invalid config returns error
+	badCfg := ProxyConfig{Host: "   "}
+	_, err = RESTClientFor(badCfg)
+	if err == nil {
+		t.Fatal("expected error on empty host, got nil")
+	}
+	if !errors.Is(err, ErrInvalidInput) {
+		t.Errorf("expected ErrInvalidInput, got %v", err)
+	}
+}
+
