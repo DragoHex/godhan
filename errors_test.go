@@ -20,6 +20,18 @@ func TestErrorTaxonomy_Sentinels(t *testing.T) {
 			targetErr:  ErrInsufficientFunds,
 		},
 		{
+			name:       "DH-901 Auth Token Expired or Invalid in Remarks",
+			statusCode: http.StatusUnauthorized,
+			body:       `{"status":"failure","remarks":{"error_code":"DH-901","message":"Client ID or user generated access token is invalid or expired."},"data":null}`,
+			targetErr:  ErrAuthExpired,
+		},
+		{
+			name:       "DH-906 Invalid Token",
+			statusCode: http.StatusBadRequest,
+			body:       `{"status":"failure","remarks":{"error_code":"DH-906","message":"Invalid Token"},"data":null}`,
+			targetErr:  ErrAuthExpired,
+		},
+		{
 			name:       "DH-905 models.Order Not Modifiable",
 			statusCode: http.StatusBadRequest,
 			body:       `{"errorType":"OrderError","errorCode":"DH-905","errorMessage":"models.Order is already closed or cancelled"}`,

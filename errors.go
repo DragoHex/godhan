@@ -140,14 +140,16 @@ func classifyError(statusCode int, code, errType, msg string) error {
 	lowerCode := strings.ToUpper(code)
 
 	// Explicit Dhan error code mappings
-	if lowerCode == "DH-901" || strings.Contains(lowerMsg, "insufficient funds") || strings.Contains(lowerMsg, "insufficient balance") {
+	if strings.Contains(lowerMsg, "insufficient funds") || strings.Contains(lowerMsg, "insufficient balance") {
 		return ErrInsufficientFunds
+	}
+	if lowerCode == "DH-901" || lowerCode == "DH-906" || statusCode == http.StatusUnauthorized ||
+		strings.Contains(lowerMsg, "token expired") || strings.Contains(lowerMsg, "invalid token") ||
+		strings.Contains(lowerMsg, "access token is invalid") || strings.Contains(lowerMsg, "invalid jwt") {
+		return ErrAuthExpired
 	}
 	if lowerCode == "DH-905" || strings.Contains(lowerMsg, "order is already closed") || strings.Contains(lowerMsg, "cannot be modified") {
 		return ErrOrderNotModifiable
-	}
-	if statusCode == http.StatusUnauthorized || strings.Contains(lowerMsg, "token expired") || strings.Contains(lowerMsg, "invalid jwt") {
-		return ErrAuthExpired
 	}
 	if statusCode == http.StatusTooManyRequests || strings.Contains(lowerMsg, "too many requests") || strings.Contains(lowerMsg, "rate limit") {
 		return ErrRateLimited
