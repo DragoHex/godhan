@@ -177,3 +177,30 @@ func TestRenewTokenResponse_Serialization(t *testing.T) {
 	}
 }
 
+func TestRenewTokenResponse_LiveGatewayFormat(t *testing.T) {
+	rawJSON := `{
+		"createTime": "2026-10-29T15:08:58.164",
+		"expiryTime": "2026-10-30T15:08:58.163",
+		"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.live-token-value"
+	}`
+
+	var resp models.RenewTokenResponse
+	if err := json.Unmarshal([]byte(rawJSON), &resp); err != nil {
+		t.Fatalf("Unmarshal live gateway RenewTokenResponse failed: %v", err)
+	}
+
+	if resp.Token != "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.live-token-value" {
+		t.Errorf("Token = %q, want expected token", resp.Token)
+	}
+	if resp.AccessToken != "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.live-token-value" {
+		t.Errorf("AccessToken = %q, want expected token mapped to AccessToken", resp.AccessToken)
+	}
+	if resp.CreateTime.Time.IsZero() {
+		t.Errorf("expected non-zero CreateTime")
+	}
+	if resp.ExpiryTime.Time.IsZero() {
+		t.Errorf("expected non-zero ExpiryTime")
+	}
+}
+
+

@@ -35,8 +35,13 @@ func (c *Client) RenewToken(ctx context.Context, tokenOverride ...string) (*mode
 		return nil, err
 	}
 
-	if resp.AccessToken != "" {
-		c.SetAccessToken(resp.AccessToken)
+	refreshedToken := resp.AccessToken
+	if refreshedToken == "" {
+		refreshedToken = resp.Token
+	}
+
+	if refreshedToken != "" {
+		c.SetAccessToken(refreshedToken)
 	} else if len(tokenOverride) > 0 {
 		c.SetAccessToken(origToken)
 	}

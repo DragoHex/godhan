@@ -141,6 +141,36 @@ func TestAuth_RenewAccessToken_ParityAlias(t *testing.T) {
 	}
 }
 
+func TestAuth_RenewToken_LiveGatewayResponseFormat(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{
+			"createTime": "2026-10-29T15:08:58.164",
+			"expiryTime": "2026-10-30T15:08:58.163",
+			"token": "dhan-live-token-777"
+		}`))
+	}))
+	defer ts.Close()
+
+	client := NewClient("1000000001", "old-token", WithBaseURI(ts.URL))
+
+	resp, err := client.RenewToken(context.Background())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if resp.Token != "dhan-live-token-777" {
+		t.Errorf("resp.Token = %q, want 'dhan-live-token-777'", resp.Token)
+	}
+	if resp.AccessToken != "dhan-live-token-777" {
+		t.Errorf("resp.AccessToken = %q, want 'dhan-live-token-777'", resp.AccessToken)
+	}
+	if client.AccessToken() != "dhan-live-token-777" {
+		t.Errorf("client.AccessToken() = %q, want 'dhan-live-token-777'", client.AccessToken())
+	}
+}
+
 func TestAuth_RenewToken_EmptyToken(t *testing.T) {
 	client := NewClient("1000000001", "")
 
