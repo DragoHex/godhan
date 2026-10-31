@@ -58,7 +58,11 @@ func ParseInstruments(r io.Reader) ([]models.Instrument, error) {
 			return nil, fmt.Errorf("error reading CSV line: %w", err)
 		}
 
-		lotSize, _ := strconv.ParseInt(strings.TrimSpace(record[lotIdx]), 10, 32)
+		lotStr := strings.TrimSpace(record[lotIdx])
+		if idx := strings.IndexByte(lotStr, '.'); idx != -1 {
+			lotStr = lotStr[:idx]
+		}
+		lotSize, _ := strconv.ParseInt(lotStr, 10, 32)
 		if lotSize <= 0 {
 			lotSize = 1
 		}
